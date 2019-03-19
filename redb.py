@@ -31,6 +31,14 @@ def init_db():
         conn.commit()
         conn.close()
 
+def get_inmem_dag()
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+        print("more to do")
+    finally:
+        conn.close()
+
 def insert_node(cursor, node_name):
     query = ("insert into nodes (node_name) values ('{}')".format(node_name))
     cursor.execute(query)
