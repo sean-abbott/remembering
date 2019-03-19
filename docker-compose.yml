@@ -1,0 +1,25 @@
+# Docker Compose file to support local development of the Fundraising Central scrapers, API and processor.
+# See ops/ folder for AWS deployment info.
+#
+# Uses Compose file version 3 which requires Docker Engine 1.13.0 or higher
+# See: https://docs.docker.com/compose/compose-file/compose-versioning/#compatibility-matrix
+#
+# All Fundraising Central services mount the local repository into each container as a volue add /usr/src/app.
+# Therefore, changes made locally are reflected inside the containers' file systems.
+
+version: '3'
+
+# Use an external volume to persiste local MySQL data between container instances
+volumes:
+  mysql_data:    
+
+services:
+  mysql:
+    image: "mysql:5.7"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: dag

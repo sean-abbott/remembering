@@ -1,0 +1,3 @@
+docker-compose
+ipython
+mysql-connector
