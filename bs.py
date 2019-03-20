@@ -1,18 +1,24 @@
+import os
 import mysql.connector
+import random
+import sys
 import time
 
 from string import ascii_lowercase
 
-def get_db_server():
+DB_HOST=os.environ.get('BS_DB_HOST', 'localhost')
+SLEEP_TIME=int(os.environ.get('BS_SLEEP_TIME', 10))
+
+def get_db_server(host=DB_HOST):
     return mysql.connector.connect(
-            host="localhost",
+            host=host,
             user="root",
             passwd="password",
             buffered=True)
 
-def get_db():
+def get_db(host=DB_HOST):
     return mysql.connector.connect(
-            host="localhost",
+            host=host,
             user="root",
             passwd="password",
             database="bs",
@@ -37,7 +43,8 @@ def init_db():
                  "status VARCHAR(32),"
                  "final_status VARCHAR(32),"
                  "period_id INT NOT NULL,"
-                 "start DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,"
+                 "queued DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,"
+                 "start DATETIME,"
                  "end DATETIME,"
                  "task_id INT);")
 
@@ -51,15 +58,65 @@ def init_db():
 
 def get_active_jobs():
     active_jobs_query = ("SELECT * FROM jobs "
-                         "WHERE state")
-    print("End get_active_jobs")
-    return []
+                         "WHERE status NOT IN "
+                         "('completed', 'errored');")
+    conn = get_db()
+    result = []
+    try:
+        cursor = conn.cursor(dictionary=True) 
+        cursor.execute(active_jobs_query)
+        result = cursor.fetchall()
+    finally:
+        conn.commit()
+        conn.close()
+    return result
+
+def random_do_update(chance):
+    '''Return True $chance percentage of the time
+
+    Inputs:
+    chance:int
+    '''
+    return random.randint(0, 99) < chance
+
+def update_job_status(job_id, time_field, new_status):
+    update_query = ("UPDATE jobs "
+                    "set status = '{}',"
+                    "{} = NOW() "
+                    "where id = {};").format(new_status, time_field, job_id)
+    conn = get_db()
+    result = None
+    try:
+        cursor = conn.cursor(dictionary=True) 
+        cursor.execute(update_query)
+        result = cursor.lastrowid
+        print('job {} marked {}'.format(job_id, new_status))
+    finally:
+        conn.commit()
+        conn.close()
+    return result
+
 
 def bs():
-    create_db()
+    create_database()
     init_db()
-    while true:
+    while True:
         active_jobs = get_active_jobs()
         for job in active_jobs:
-            print(job)
-        time.sleep(300) 
+            if job['status'] == 'queued':
+                if random_do_update(80):
+                    update_job_status(job['id'], 'start',  'running')
+            if job['status'] == 'running':
+                if random_do_update(50):
+                    update_job_status(job['id'], 'end',  'complete')
+                elif random_do_update(10):
+                    update_job_status(job['id'], 'end',  'errored')
+
+
+        print('Status updates complete. Sleeping for {} seconds'.format(SLEEP_TIME))
+        sys.stdout.flush()
+        time.sleep(SLEEP_TIME)
+
+if __name__ == '__main__':
+    print("Starting batch simulator...")
+    bs()

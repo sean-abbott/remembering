@@ -26,7 +26,6 @@ services:
       MYSQL_DATABASE: dag
     healthcheck:
       test: "/usr/bin/mysql -hlocalhost -ppassword -uroot -e \"SHOW DATABASES;\""
-      #test: ["CMD", "/usr/bin/mysql", "--user=root", "--password=password", "-e", "\"SHOW DATABASES;\""]
       interval: 60s
       timeout: 10s
       retries: 3
@@ -40,3 +39,11 @@ services:
       BS_DB_HOST: dag_db
     volumes:
      - .:/src
+
+  bs:
+    build: ./bs
+    volumes:
+     - .:/src
+    environment:
+      BS_DB_HOST: dag_db
+      BS_SLEEP_TIME: 10

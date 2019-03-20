@@ -18,7 +18,7 @@ def queue(job_id, period):
                  "(status, period_id, task_id) "
                  "values ('queued', {}, {});").format(period, job_id)
     print(queue_sql)
-    result = -1
+    result = None
     try:
         cursor = conn.cursor()
         cursor.execute(queue_sql)
