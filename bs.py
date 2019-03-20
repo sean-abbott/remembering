@@ -46,3 +46,13 @@ def init_db():
     finally:
         conn.commit()
         conn.close()
+
+
+
+def bs():
+    create_db()
+    init_db()
+    while true:
+        active_jobs = get_active_jobs()
+        for job in active_jobs:
+            print(job)
