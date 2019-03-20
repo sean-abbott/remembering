@@ -1,4 +1,5 @@
 import mysql.connector
+import time
 
 from string import ascii_lowercase
 
@@ -34,6 +35,7 @@ def init_db():
                  "jobs ("
                  "id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
                  "status VARCHAR(32),"
+                 "final_status VARCHAR(32),"
                  "period_id INT NOT NULL,"
                  "start DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,"
                  "end DATETIME,"
@@ -47,7 +49,11 @@ def init_db():
         conn.commit()
         conn.close()
 
-
+def get_active_jobs():
+    active_jobs_query = ("SELECT * FROM jobs "
+                         "WHERE state")
+    print("End get_active_jobs")
+    return []
 
 def bs():
     create_db()
@@ -56,3 +62,4 @@ def bs():
         active_jobs = get_active_jobs()
         for job in active_jobs:
             print(job)
+        time.sleep(300) 

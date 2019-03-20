@@ -32,21 +32,11 @@ services:
       retries: 3
       start_period: 10s
 
-#  bs_db:
-#    image: "mysql:5.7"
-#    ports:
-#      - "3306:3306"
-#    volumes:
-#      - bs_data:/var/lib/mysql
-#    environment:
-#      MYSQL_ROOT_PASSWORD: password
-#      MYSQL_DATABASE: bs
-#    healthcheck:
-#      test: "/usr/bin/mysql -hlocalhost -ppassword -uroot -e \"SHOW DATABASES;\""
-#      #test: ["CMD", "/usr/bin/mysql", "--user=root", "--password=password", "-e", "\"SHOW DATABASES;\""]
-#      interval: 10s
-#      timeout: 10s
-#      retries: 3
-#      start_period: 10s
-#    
-#    
+  bs_interface:
+    build: ./bs_web
+    ports:
+     - "5000:5000"
+    environment:
+      BS_DB_HOST: dag_db
+    volumes:
+     - .:/src
